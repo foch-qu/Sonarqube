@@ -1,0 +1,71 @@
+apply plugin: 'jacoco'
+//plugins { id "org.sonarqube" version "3.0" }
+
+//apply plugin: "org.sonarqube"
+
+jacoco {
+    toolVersion = "0.8.6"
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+}
+
+ext {
+    getFileFilter = { ->
+        def jacocoSkipClasses = null
+        if (project.hasProperty('jacocoSkipClasses')) {
+            jacocoSkipClasses = project.property('jacocoSkipClasses')
+        }
+
+        def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+        if (jacocoSkipClasses != null) {
+            fileFilter.addAll(jacocoSkipClasses)
+        }
+
+        return fileFilter
+    }
+}
+
+/**
+ * buildTypes {
+ *     debug {
+ *         minifyEnabled false
+ *     }
+ *     coverageDebug {
+ *         minifyEnabled false
+ *         testCoverageEnabled true
+ *     }
+ * }
+ */
+task jacocoCoverageTestReport(type: JacocoReport, dependsOn: ['testCoverageDebugUnitTest', 'createCoverageDebugCoverageReport']) {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+//        xml.destination file("${buildDir}/reports/jacoco.xml")    
+
+    }
+
+    def fileFilter = project.getFileFilter()
+    //def coverageDebugTree = fileTree(dir: "$project.buildDir/intermediates/classes/coverageDebug", excludes: fileFilter)
+    def coverageDebugTreeNewGradle = fileTree(dir: "$project.buildDir/intermediates/javac/coverageDebug/classes", excludes: fileFilter)
+    def mainSrc = "$project.projectDir/src/main/java"
+
+//    sourceDirectories = files([mainSrc])
+    getSourceDirectories().setFrom(files([mainSrc]))
+
+//    classDirectories = files([coverageDebugTree, coverageDebugTreeNewGradle])
+//      getClassDirectories().setFrom(files([coverageDebugTree, coverageDebugTreeNewGradle]))
+    getClassDirectories().setFrom(files([coverageDebugTreeNewGradle]))
+
+//    executionData = fileTree(dir: project.buildDir, includes: [
+//            'jacoco/testCoverageDebugUnitTest.exec', 'outputs/code-coverage/connected/*coverage.ec'
+//    ])
+
+
+    getExecutionData().setFrom(fileTree(dir: project.buildDir, includes: [
+            'jacoco/testCoverageDebugUnitTest.exec'
+    ]))
+
+
+}

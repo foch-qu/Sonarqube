@@ -1,0 +1,37 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.0.1"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.0"
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+apply plugin: "org.sonarqube"
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+sonarqube {
+    properties {
+//      property "sonar.projectVersion", "1.0"
+        property "sonar.projectName", "jacoco6"     //projectName 显示名称，可以带特殊字符
+        property "sonar.projectKey", "jacoco6"    //projectKey 唯一，且不能命名有/,-,+
+        property "sonar.host.url", "http://192.168.0.212:9000/"
+        property "sonar.login", "token"
+//      property "sonar.language", "java"          //Automatic language recognition
+//      property "sonar.java.binaries", "./app/src/main/java"
+//      property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${rootProject.projectDir}/app/build/reports/jacoco/jacocoCoverageTestReport/jacocoCoverageTestReport.xml"
+    }
+}
